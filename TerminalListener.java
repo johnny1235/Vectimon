@@ -38,22 +38,23 @@ public class TerminalListener implements CallControlTerminalConnectionListener {
 	String[] config = new String[10];
 	writer ww2;
 
-	public TerminalListener(Provider boss, String id, writer write) throws FileNotFoundException, UnsupportedEncodingException
+	public TerminalListener(Provider prov, String id, writer write) throws FileNotFoundException, UnsupportedEncodingException
 	{
 		 termAgentID = id;
-		 myProvider = boss;
+		 myProvider = prov;
 		 ww2 = write;
 		 connectDB();
 	}
-	public TerminalListener(Provider boss)
+	public TerminalListener(Provider prov)
 	{
-		 myProvider = boss;
+		 myProvider = prov;
 	}
 	
 	public void connectDB() throws FileNotFoundException, UnsupportedEncodingException
 	{
 		Scanner read = null;
-		try {
+		try 
+		{
 		    Date d = new Date();
 			read = new Scanner (new File("config.txt"));
 			read.useDelimiter(";");
@@ -66,29 +67,28 @@ public class TerminalListener implements CallControlTerminalConnectionListener {
 			DBHost = config[2];
 			DBDb = config[1];
 			DBUser = config[3];
-		    DBPasswd = config[4];
+		    	DBPasswd = config[4];
 			
-		} catch (FileNotFoundException e) {
+		} 
+		catch (FileNotFoundException e) 
+		{
 			if("finest".equals(config[5]))
-		    {
-			ww2.writeData("Config File not found");
-		    }
+		    	{
+				ww2.writeData("Config File not found");
+		    	}
 		}
 	
 	}
 	
 	private void insert(String ucid, String agentID) throws SQLException, ClassNotFoundException, FileNotFoundException, UnsupportedEncodingException
 	{			
-	    Date d = new Date();
+		Date d = new Date();
 		Class.forName("org.postgresql.Driver");
-	
-		
-		 // Database connection
 
-
+		// Database connection
 		String connectionUrl = "jdbc:postgresql://" + DBHost + "/" + DBDb + "?user=" + DBUser + "&password=" + DBPasswd + "";
 		java.sql.Connection con = DriverManager.getConnection(connectionUrl);
-		
+
 		Statement statement = con.createStatement();
 		Statement statement2 = con.createStatement();
 		String Query2 = "select 1 from calls where agentid like '"+agentID+"' AND ucid like '"+ucid+"'";
@@ -96,49 +96,58 @@ public class TerminalListener implements CallControlTerminalConnectionListener {
 		// check if entry exists 
 		ResultSet result = statement2.executeQuery(Query2);
 		if(result.next())
-		{       // data exist
-				con.close();
-        }
+		{       
+			// data exist
+			con.close();
+		}
 
-       else
-        {//data not exist
-    	   statement.executeUpdate("INSERT INTO calls (agentid, ucid)" + "VALUES ('"+agentID+"', '"+ucid+"');");
- 	       if("finest".equals(config[5]))
+	       else
+		{
+		       //data not exist
+			statement.executeUpdate("INSERT INTO calls (agentid, ucid)" + "VALUES ('"+agentID+"', '"+ucid+"');");
+			if("finest".equals(config[5]))
 			{
-   	    	ww2.writeData(d + ":  Inserted: "+ucid+" "+ agentID);
+				ww2.writeData(d + ":  Inserted: "+ucid+" "+ agentID);
 			}
-    	   con.close();
-        } 
+			con.close();
+		} 
 		
 	}
-    private String getTerminalName(TerminalConnectionEvent event) {
+    private String getTerminalName(TerminalConnectionEvent event) 
+    {
         String name = null;
-        try {
+        try 
+	{
           TerminalConnection termConn = event.getTerminalConnection();
           Terminal term = termConn.getTerminal();
           name = term.getName();
-        } catch (Exception excp) {
+        } 
+	catch (Exception excp) 
+	{
           // Handle Exceptions
-		}
-		return name;
 	}
+	return name;
+    }
     
-    private String getTerminalName2(ConnectionEvent event) {
+    private String getTerminalName2(ConnectionEvent event) 
+    {
         String name = null;
-        try {
+        try 
+	{
         	
         	Call testCall = event.getCall();
         	Connection good = event.getConnection();
         	TerminalConnection[] hot = good.getTerminalConnections();
-            Terminal term = hot[0].getTerminal();
-            name = term.getName();
+            	Terminal term = hot[0].getTerminal();
+            	name = term.getName();
             
-
-        } catch (Exception excp) {
+        } 
+	catch (Exception excp) 
+	{
           // Handle Exceptions
-		}
-		return name;
 	}
+	return name;
+    }
    
 	public void terminalConnectionActive(TerminalConnectionEvent event) {
 	}
@@ -220,55 +229,74 @@ public class TerminalListener implements CallControlTerminalConnectionListener {
 	public void connectionDisconnected(CallControlConnectionEvent event) {
 	}
 	
-	public void connectionEstablished(CallControlConnectionEvent event) {
-	Call call = event.getCall(); 
-	String ucid = ((LucentV5CallInfo)call).getUCID();
-    Date d = new Date();
+	public void connectionEstablished(CallControlConnectionEvent event) 
+	{
+		Call call = event.getCall(); 
+		String ucid = ((LucentV5CallInfo)call).getUCID();
+    		Date d = new Date();
 
-	try {
-		insert(ucid, termAgentID);
-		if("finest".equals(config[5]))
-	    {
-			ww2.writeData(d + ":  TerminalConnection to Terminal: " 
-			+ getTerminalName2(event)+" Agent ID:" + termAgentID +" UCID: "+ucid + " is established"); //AgentID & UCID Log file
-	    }
-	} catch (ClassNotFoundException e) {
-		// TODO Auto-generated catch block
-	    if("finest".equals(config[5]))
-	    {
-	    	try {
-				ww2.writeData(d + ":  Cant find Jar file for Db connection");
-			} catch (FileNotFoundException e1) {
+		try 
+		{
+			insert(ucid, termAgentID);
+			if("finest".equals(config[5]))
+	    		{
+				ww2.writeData(d + ":  TerminalConnection to Terminal: " 
+					+ getTerminalName2(event)+" Agent ID:" + termAgentID +" UCID: "+ucid + " is established"); //AgentID & UCID Log file
+	    		}
+		} 
+		catch (ClassNotFoundException e) 
+		{
+			// TODO Auto-generated catch block
+	   		 if("finest".equals(config[5]))
+	    		{
+	    			try 
+				{
+					ww2.writeData(d + ":  Cant find Jar file for Db connection");
+				} 
+				catch (FileNotFoundException e1) 
+				{
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			} catch (UnsupportedEncodingException e1) {
+				} 
+				catch (UnsupportedEncodingException e1) 
+				{
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			}
-	    }
-		
-	} catch (SQLException e) {
-		// TODO Auto-generated catch block
-		if("finest".equals(config[5]))
-	    {
-			try {
+				}
+	       		}
+	 	} 
+		catch (SQLException e) 
+		{
+			// TODO Auto-generated catch block
+			if("finest".equals(config[5]))
+	    		{
+				try 
+				{
 				ww2.writeData(d + ":  No database connection...");
-			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (UnsupportedEncodingException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				} 
+				catch (FileNotFoundException e1) 
+				{
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} 
+				catch (UnsupportedEncodingException e1) 
+				{
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
+			e.printStackTrace();
+		} 
+		catch (FileNotFoundException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		catch (UnsupportedEncodingException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		e.printStackTrace();
-	} catch (FileNotFoundException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (UnsupportedEncodingException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
 
 	}
 	
@@ -306,34 +334,40 @@ public class TerminalListener implements CallControlTerminalConnectionListener {
 	public void terminalConnectionInUse(CallControlTerminalConnectionEvent event) {
 	}
 	
-	public void terminalConnectionRinging(CallControlTerminalConnectionEvent event) {
+	public void terminalConnectionRinging(CallControlTerminalConnectionEvent event) 
+	{
 		
-		try {
-		    Date d = new Date();
+		try 
+		{
+		    	Date d = new Date();
 			if("finest".equals(config[5]))
-		    {
-			ww2.writeData(d + ":  TerminalConnection to Terminal: " 
-				+ getTerminalName(event) + " CAll ID: "+event.getID() + " is RINGING");
-		    }
+		    	{
+				ww2.writeData(d + ":  TerminalConnection to Terminal: " 
+					+ getTerminalName(event) + " CAll ID: "+event.getID() + " is RINGING");
+		    	}
 			
 			/* ---------------------  Auto answer -------------------------
 			final TerminalConnection termconn = event.getTerminalConnection();
-	     	Runnable runnable = new Runnable() {
-				public void run() {
-					try {
-						termconn.answer();
-				  	} 
-					catch (Exception excp) {
+	     		Runnable runnable = new Runnable() {
+			public void run() 
+			{
+				try 
+				{
+					termconn.answer();
+				 } 
+				catch (Exception excp)
+				{
 			    		// Handle answer exceptions
-				  	}
+				 }
 				};
 			};
 			Thread thread = new Thread(runnable);
 			thread.start();*/
-        } 
-		catch (Exception excp) {
-            // Handle Exceptions;
-        }
+        	} 
+		catch (Exception excp) 
+		{
+            	// Handle Exceptions;
+        	}
 	}
 
 	public void terminalConnectionTalking(CallControlTerminalConnectionEvent event) {
