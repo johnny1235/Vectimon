@@ -69,7 +69,8 @@ import java.io.IOException;
 public class test2{
 	
 	@SuppressWarnings("null")
-	public static void main(String[] args) {
+	public static void main(String[] args) 
+	{
 		String[] services;
 		Address[] addresses;
 		
@@ -87,12 +88,12 @@ public class test2{
 	    	
 		try
 		{
-		    Date d = new Date();
+		    	Date d = new Date();
 		    
-		    Scanner read = new Scanner (new File("config.txt"));
-		    read.useDelimiter(";");
+		    	Scanner read = new Scanner (new File("config.txt"));
+		    	read.useDelimiter(";");
 		   
-			String[] config = new String[20];
+		  	String[] config = new String[20];
 			int num = 0;
 			while(read.hasNext())
 			{
@@ -102,60 +103,59 @@ public class test2{
 			System.out.println("Log Level: " + config[5]);
 			
 			writer ww = new writer("events");
-		    //Vectimon connection
+		        //Vectimon connection
 
-			 JtapiPeer peer = JtapiPeerFactory.getJtapiPeer("com.avaya.jtapi.tsapi.TsapiPeer");
-			 services = peer.getServices(); // get tlinks
-			 System.out.println(services[0]);
-		     System.out.println(services[1]);
-			 if(services == null)
-				 {
-				 	if("finest".equals(config[5]))
-				 	{
-					    Date d1 = new Date();
-				 		 ww.writeData(d1 + ":  AES Connection not working");
-				 	}
-		             ww.close();
-					 System.exit(0);
-				 }
+			JtapiPeer peer = JtapiPeerFactory.getJtapiPeer("com.avaya.jtapi.tsapi.TsapiPeer");
+			services = peer.getServices(); // get tlinks
+			System.out.println(services[0]);
+		     	System.out.println(services[1]);
+			if(services == null)
+			{
+				if("finest".equals(config[5]))
+				{
+					Date d1 = new Date();
+				 	ww.writeData(d1 + ":  AES Connection not working");
+				}
+		                ww.close();
+				System.exit(0);
+			}
 		
-		    Provider myprovider = peer.getProvider(services[0] + ";login=" + config[6] +";passwd=" + config[7]); 
+		    	Provider myprovider = peer.getProvider(services[0] + ";login=" + config[6] +";passwd=" + config[7]); 
 		    
 			Address hunt = myprovider.getAddress(config[0]); // Hunt Group
 		
-		    ACDAddress test2 = (ACDAddress) hunt;
-		    Agent[] agent = test2.getLoggedOnAgents();
+		    	ACDAddress monNumber = (ACDAddress) hunt;
+		    	Agent[] agent = monNumber.getLoggedOnAgents();
 		    
-		    // Add Listener to hunt address to log agent Events
-	      ACDAddressListener boss5 = new ACDAddressListener(agent, ww);
-     	  test2.addAddressListener(boss5);
+		    	// Add Listener to hunt address to log agent Events
+	      		ACDAddressListener listener = new ACDAddressListener(agent, ww);
+     	  		monNumber.addAddressListener(listener);
            	   
-		    //wait
-		    int a = 0;
+		    	//wait
+		    	int scanInput = 0;
 			Scanner sc = new Scanner(System.in);
-		    while(a!=5)
+		   	while(scanInput!=5)
 			{
 				 System.out.println("Enter 5 to exit");  
-				 a = sc.nextInt();
-
+				 scanInput = sc.nextInt();
 			}		
 		
-		    // Exit
-		    if(a == 5) // Close program and remove Listener
-		    {
+		    	// Exit
+		    	if(scanInput == 5) // Close program and remove Listener
+		    	{
 		        
-		     	test2.removeAddressListener(boss5);
-	            ww.close();
-		    	System.out.println("Done!");
-		    	 System.exit(0);
-		    }
+		     		monNumber.removeAddressListener(listener);
+	           		ww.close();
+		    		System.out.println("Done!");
+		    	 	System.exit(0);
+		    	}
 		    
-		    // Waiting time
+		    	// Waiting time
 		
 		}
 		catch (Exception excp)
 		{
-		 System.out.println("Exception during getting JtapiPeer: " + excp);
+			 	System.out.println("Exception during getting JtapiPeer: " + excp);
 		} 
 	}
 
